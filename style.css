@@ -1,0 +1,5 @@
+#game-container {
+  width: 800px; /* Set the width */
+  height: 600px; /* Set the height */
+  margin: 20px auto; /* Center the container */
+}
