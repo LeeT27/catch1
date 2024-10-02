@@ -35,4 +35,5 @@ function create() {
 function update() {
   const mouseX = this.input.x;
   player.x = mouseX;
+  tesing
 }
