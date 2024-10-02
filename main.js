@@ -34,6 +34,13 @@ function create() {
 
 function update() {
   const mouseX = this.input.x;
-  player.x = mouseX;
-  tesing2 hello
+  if (mouseX<player.width/2){
+    player.x=player.width/2;
+  }
+  else if(mouseX>game.config.width-player.width/2){
+    player.x=game.config.width-player.width/2;
+  }
+  else{
+    player.x = mouseX;
+  }
 }
