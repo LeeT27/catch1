@@ -36,7 +36,7 @@ function create() {
   player.setCollideWorldBounds(true);
   this.anims.create({
     key: 'loop',
-    frames: this.anims.generateFrameNumbers('rock', { start: 0, end: 6 }), // Adjust start and end as per your spritesheet
+    frames: this.anims.generateFrameNumbers('rock', { start: 0, end: 36 }), // Adjust start and end as per your spritesheet
     frameRate: 10,
     repeat: -1, // Loop forever
   });
