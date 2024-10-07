@@ -34,14 +34,10 @@ function create() {
   // this.add.image(400, 300, 'sky');
   player = this.physics.add.image(0, 500, 'player');
   player.setCollideWorldBounds(true);
-  this.anims.create({
-    key: 'loop',
-    frames: this.anims.generateFrameNumbers('rock', { start: 0, end: 36 }), // Adjust start and end as per your spritesheet
-    frameRate: 10,
-    repeat: -1, // Loop forever
-  });
   let rock = this.add.sprite(100, 100, 'rock');
   rock.play('loop');
+
+  createFallingSprite(this, 400, 50, 'rock');
 }
 
 function update() {
@@ -53,4 +49,23 @@ function update() {
   } else {
     player.x = mouseX;
   }
+}
+
+function createFallingSprite(scene, x, y, spriteSheetKey) {
+  // Create the sprite from the spritesheet
+  let sprite = scene.physics.add.sprite(x, y, spriteSheetKey);
+
+  sprite.setDisplaySize(50, 50);
+  sprite.body.setVelocityY(100);
+  sprite.body.setCollideWorldBounds(true);
+
+  this.anims.create({
+    key: 'loop',
+    frames: scene.anims.generateFrameNumbers('rock', { start: 0, end: 36 }), // Adjust start and end as per your spritesheet
+    frameRate: 10,
+    repeat: -1, // Loop forever
+  });
+  sprite.play('loop');
+
+  return sprite;
 }
