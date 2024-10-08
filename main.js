@@ -35,11 +35,12 @@ function create() {
   player = this.physics.add.image(0, 500, 'player');
   player.setCollideWorldBounds(true);
   this.anims.create({
-    key: 'fall',
+    key: 'spin',
     frames: this.anims.generateFrameNumbers('rock', { start: 0, end: 36 }), // Adjust start and end as per your spritesheet
     frameRate: 10,
     repeat: -1, // Loop forever
   });
+  addRandomSprite();
 }
 
 function update() {
@@ -51,19 +52,9 @@ function update() {
   } else {
     player.x = mouseX;
   }
-  if (this.time.now % 1000 < 50) {
-    // Roughly every second
-    spawnFallingSprite(Phaser.Math.Between(0, this.scale.width), 200, 200); // X, Y, velocity
-  }
 }
 
-function spawnFallingSprite(x, y, velocity) {
-  const sprite = this.physics.add.sprite(x, y, 'rock');
-  sprite.anims.play('fall');
-  sprite.setVelocityY(velocity); // Set the Y velocity
-
-  // Optional: Add collision detection or boundaries
-  sprite.setCollideWorldBounds(true); // Prevent the sprite from falling out of the world
-
-  return sprite;
+function addRandomSprite() {
+  let rock1 = this.physics.add.sprite(400, 200, 'rock');
+  this.add.existing(rock1);
 }
