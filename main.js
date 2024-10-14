@@ -18,6 +18,11 @@ const config = {
   },
 };
 var player;
+let fallingSprites;
+let SPEED = 400;
+let counter = 0;
+let counterText;
+
 const game = new Phaser.Game(config);
 function preload() {
   // Load assets here (e.g., images, sounds)
@@ -40,7 +45,17 @@ function create() {
     frameRate: 10,
     repeat: -1, // Loop forever
   });
-  addRandomSprite();
+  this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+
+  // Set up an event listener for the key press
+  this.wKey.on('down', runFunction, this);
+  fallingSprites = this.physics.add.group();
+  counterText = this.add
+    .text(400, 300, `Counter: ${counter}`, {
+      fontSize: '48px',
+      color: '#ffffff',
+    })
+    .setOrigin(0.5, 0.5);
 }
 
 function update() {
@@ -52,9 +67,19 @@ function update() {
   } else {
     player.x = mouseX;
   }
+  fallingSprites.children.iterate((sprite) => {
+    sprite.setVelocityY(SPEED); // Apply constant falling speed
+  });
 }
-
-function addRandomSprite() {
-  let rock1 = this.physics.add.sprite(400, 200, 'rock');
-  this.add.existing(rock1);
+function runFunction() {
+  let rock = fallingSprites.create(
+    Phaser.Math.Between(0, config.width - 32),
+    0,
+    'rock'
+  );
+  rock.setCollideWorldBounds(true);
+  rock.setScale(0.5, 0.4);
+  rock.anims.play('walk');
+  counter++;
+  counterText.setText(`Counter: ${counter}`);
 }
