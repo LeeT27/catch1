@@ -18,10 +18,14 @@ const config = {
   },
 };
 var player;
+var bar;
 let fallingSprites;
-let SPEED = 400;
-let counter = 0;
-let counterText;
+let SPEED = 200;
+let interval = 50;
+let score = 0;
+let scoreText;
+let life = 5;
+let lifeText;
 
 const game = new Phaser.Game(config);
 function preload() {
@@ -38,6 +42,8 @@ function create() {
   // Add game objects here
   // this.add.image(400, 300, 'sky');
   player = this.physics.add.image(0, 500, 'player');
+  bar = this.physics.add.image(400, 650, 'player');
+  bar.setScale(8, 1);
   player.setCollideWorldBounds(true);
   this.anims.create({
     key: 'spin',
@@ -50,8 +56,14 @@ function create() {
   // Set up an event listener for the key press
   this.wKey.on('down', spawnRock, this);
   fallingSprites = this.physics.add.group();
-  counterText = this.add
-    .text(600, 100, `Score: ${counter}`, {
+  scoreText = this.add
+    .text(600, 100, `Score: ${score}`, {
+      fontSize: '48px',
+      color: '#ffffff',
+    })
+    .setOrigin(0.5, 0.5);
+  lifeText = this.add
+    .text(150, 100, `Lives: ${life}`, {
       fontSize: '48px',
       color: '#ffffff',
     })
@@ -63,8 +75,20 @@ function create() {
     null,
     this
   );
-}
+  this.physics.add.collider(bar, fallingSprites, loseLife, null, this);
 
+  this.time.addEvent({
+    delay: interval, // 250 milliseconds
+    callback: myFunction,
+    callbackScope: this,
+    loop: true, // Set to true to repeat
+  });
+}
+function myFunction() {
+  interval = 0.005;
+  SPEED += 10;
+  spawnRock();
+}
 function update() {
   const mouseX = this.input.x;
   if (mouseX < player.width / 2) {
@@ -78,31 +102,26 @@ function update() {
     sprite.setVelocityY(SPEED); // Apply constant falling speed
   });
   player.setVelocityY(0);
-
-  if (fallingSprites.y > 300) {
-    loseLife();
-  }
+  player.y = 500;
+  bar.setVelocityY(0);
 }
 function spawnRock() {
   let rock = fallingSprites.create(
-    Phaser.Math.Between(0, config.width - 32),
+    Phaser.Math.Between(32, config.width - 32),
     0,
     'rock'
   );
-  rock.setCollideWorldBounds(true);
+
   rock.setScale(0.5, 0.5);
   rock.anims.play('spin');
-  rock.body.onWorldBounds = true;
-  rock.body.world.on('worldbounds', loseLife, this);
 }
 function handleCollision(player, fallingSprites) {
   fallingSprites.destroy(); // Remove the rock
-  counter++;
-  counterText.setText(`Score: ${counter}`);
+  score++;
+  scoreText.setText(`Score: ${interval}`);
 }
-function loseLife(body, up, down, left, right) {
-  // Only trigger the function if the collision is with the bottom boundary
-  if (down) {
-    fallingSprites.destroy();
-  }
+function loseLife(bar, fallingSprites) {
+  fallingSprites.destroy(); // Remove the rock
+  life--;
+  lifeText.setText(`Lives: ${SPEED}`);
 }
