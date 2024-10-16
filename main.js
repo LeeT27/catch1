@@ -48,14 +48,21 @@ function create() {
   this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
 
   // Set up an event listener for the key press
-  this.wKey.on('down', runFunction, this);
+  this.wKey.on('down', spawnRock, this);
   fallingSprites = this.physics.add.group();
   counterText = this.add
-    .text(400, 300, `Counter: ${counter}`, {
+    .text(600, 100, `Score: ${counter}`, {
       fontSize: '48px',
       color: '#ffffff',
     })
     .setOrigin(0.5, 0.5);
+  this.physics.add.collider(
+    player,
+    fallingSprites,
+    handleCollision,
+    null,
+    this
+  );
 }
 
 function update() {
@@ -70,16 +77,32 @@ function update() {
   fallingSprites.children.iterate((sprite) => {
     sprite.setVelocityY(SPEED); // Apply constant falling speed
   });
+  player.setVelocityY(0);
+
+  if (fallingSprites.y > 300) {
+    loseLife();
+  }
 }
-function runFunction() {
+function spawnRock() {
   let rock = fallingSprites.create(
     Phaser.Math.Between(0, config.width - 32),
     0,
     'rock'
   );
   rock.setCollideWorldBounds(true);
-  rock.setScale(0.5, 0.4);
-  rock.anims.play('walk');
+  rock.setScale(0.5, 0.5);
+  rock.anims.play('spin');
+  rock.body.onWorldBounds = true;
+  rock.body.world.on('worldbounds', loseLife, this);
+}
+function handleCollision(player, fallingSprites) {
+  fallingSprites.destroy(); // Remove the rock
   counter++;
-  counterText.setText(`Counter: ${counter}`);
+  counterText.setText(`Score: ${counter}`);
+}
+function loseLife(body, up, down, left, right) {
+  // Only trigger the function if the collision is with the bottom boundary
+  if (down) {
+    fallingSprites.destroy();
+  }
 }
