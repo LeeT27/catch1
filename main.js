@@ -20,8 +20,8 @@ const config = {
 var player;
 var bar;
 let fallingSprites;
-let timerEvent = null;
-let SPEED = 200;
+let timerEvent;
+let SPEED = 300;
 let DELAY = 500;
 let score = 0;
 let scoreText;
@@ -58,13 +58,13 @@ function create() {
   this.wKey.on('down', spawnRock, this);
   fallingSprites = this.physics.add.group();
   scoreText = this.add
-    .text(600, 100, `Interval: ${score}`, {
+    .text(600, 100, `Score: ${score}`, {
       fontSize: '48px',
       color: '#ffffff',
     })
     .setOrigin(0.5, 0.5);
   lifeText = this.add
-    .text(150, 100, `Speed: ${life}`, {
+    .text(150, 100, `Lives: ${life}`, {
       fontSize: '48px',
       color: '#ffffff',
     })
@@ -77,7 +77,7 @@ function create() {
     this
   );
   this.physics.add.collider(bar, fallingSprites, loseLife, null, this);
-  startTimer();
+  startTimer.call(this);
 }
 function update() {
   const mouseX = this.input.x;
@@ -103,20 +103,21 @@ function spawnRock() {
   );
   rock.setScale(0.5, 0.5);
   rock.anims.play('spin');
-  changeTimerInterval();
-  scoreText.setText(`Score: ${DELAY}`);
-  lifeText.setText(`Lives: ${SPEED}`);
+  DELAY -= 7;
+  SPEED += 2;
+  startTimer.call(this);
 }
 function handleCollision(player, fallingSprites) {
   fallingSprites.destroy(); // Remove the rock
   score++;
-  scoreText.setText(`Score: ${DELAY}`);
+  scoreText.setText(`Score: ${score}`);
 }
 function loseLife(bar, fallingSprites) {
   fallingSprites.destroy(); // Remove the rock
   life--;
-  lifeText.setText(`Lives: ${SPEED}`);
+  lifeText.setText(`Lives: ${life}`);
 }
+
 function startTimer() {
   // Stop any existing timer before starting a new one
   if (timerEvent) {
@@ -125,17 +126,9 @@ function startTimer() {
 
   // Create a new timer event
   timerEvent = this.time.addEvent({
-    delay: 500,
-    callback: onTimerEvent,
-    callbackScope: this,
-    loop: true,
+    delay: DELAY, // Time in milliseconds
+    callback: spawnRock, // Function to call
+    callbackScope: this, // Scope for the callback
+    loop: true, // Loop the timer
   });
-}
-function changeTimerInterval() {
-  DELAY = 250;
-  startTimer(); // Restart the timer with the new interval
-}
-function onTimerEvent() {
-  alert('Timer event triggered!');
-  // Add your timer logic here
 }
