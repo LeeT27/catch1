@@ -21,22 +21,31 @@ var player;
 var bar;
 let fallingSprites;
 let timerEvent;
+let clock;
 let SPEED = 300;
 let DELAY = 500;
 let score = 0;
 let scoreText;
-let life = 5;
-let lifeText;
+let time = 0;
+let timeText;
+let hearts = [];
+let maxHearts = 5;
+let damageOverlay;
+let damageTween;
+
+let ding;
 
 const game = new Phaser.Game(config);
 function preload() {
   // Load assets here (e.g., images, sounds)
   // this.load.image('sky', 'assets/sky.png');
   this.load.image('player', 'assets/player.png');
+  this.load.image('heart', 'assets/heart.png');
   this.load.spritesheet('rock', 'assets/rock.png', {
     frameWidth: 85,
     frameHeight: 100,
   });
+  this.load.audio('ding', 'assets/ding.wav');
 }
 
 function create() {
@@ -58,14 +67,16 @@ function create() {
   this.wKey.on('down', spawnRock, this);
   fallingSprites = this.physics.add.group();
   scoreText = this.add
-    .text(600, 100, `Score: ${score}`, {
+    .text(650, 100, `Score: ${score}`, {
       fontSize: '48px',
+      font: '40px Comfortaa',
       color: '#ffffff',
     })
     .setOrigin(0.5, 0.5);
-  lifeText = this.add
-    .text(150, 100, `Lives: ${life}`, {
+  timeText = this.add
+    .text(400, 50, `${time / 60}:${time / 10}${time % 10}`, {
       fontSize: '48px',
+      font: '32px Comfortaa',
       color: '#ffffff',
     })
     .setOrigin(0.5, 0.5);
@@ -78,6 +89,34 @@ function create() {
   );
   this.physics.add.collider(bar, fallingSprites, loseLife, null, this);
   startTimer.call(this);
+
+  clock = this.time.addEvent({
+    delay: 1000, // Time in milliseconds
+    callback: tick, // Function to call
+    callbackScope: this, // Scope for the callback
+    loop: true, // Loop the timer
+  });
+
+  for (let i = 0; i < maxHearts; i++) {
+    let heart = this.add.image(50 + i * 50, 100, 'heart').setOrigin(0.5, 0.5);
+    heart.setScale(0.04);
+    hearts.push(heart);
+  }
+
+  damageOverlay = this.add.graphics();
+  damageOverlay.fillStyle(0xff0000, 0.5);
+  damageOverlay.fillRect(
+    0,
+    0,
+    this.cameras.main.width,
+    this.cameras.main.height
+  );
+
+  // Initially set the overlay to be invisible
+  damageOverlay.alpha = 0;
+  damageOverlay.setDepth(10);
+
+  ding = this.sound.add('ding');
 }
 function update() {
   const mouseX = this.input.x;
@@ -103,19 +142,22 @@ function spawnRock() {
   );
   rock.setScale(0.5, 0.5);
   rock.anims.play('spin');
-  DELAY -= 7;
-  SPEED += 2;
   startTimer.call(this);
 }
 function handleCollision(player, fallingSprites) {
   fallingSprites.destroy(); // Remove the rock
   score++;
   scoreText.setText(`Score: ${score}`);
+  ding.play();
 }
 function loseLife(bar, fallingSprites) {
   fallingSprites.destroy(); // Remove the rock
-  life--;
-  lifeText.setText(`Lives: ${life}`);
+  if (hearts.length > 0) {
+    // Remove the last heart
+    let heart = hearts.pop();
+    heart.destroy();
+  }
+  pulseRed(this);
 }
 
 function startTimer() {
@@ -130,5 +172,36 @@ function startTimer() {
     callback: spawnRock, // Function to call
     callbackScope: this, // Scope for the callback
     loop: true, // Loop the timer
+  });
+}
+function tick() {
+  time++;
+  timeText.setText(
+    `${Math.floor(time / 60)}:${Math.floor(time / 10) % 6}${time % 10}`
+  );
+  DELAY -= 7;
+  SPEED += 2;
+}
+
+function pulseRed(scene) {
+  // Set the overlay to visible
+  if (damageTween) {
+    damageTween.stop(); // Stop the current tween
+  }
+
+  // Reset the overlay's alpha to visible
+  damageOverlay.alpha = 1;
+
+  // Create a new tween to fade out the red overlay
+  damageTween = scene.tweens.add({
+    targets: damageOverlay,
+    alpha: 0,
+    duration: 500, // duration of the pulse
+    ease: 'Sine.easeInOut',
+    onComplete: () => {
+      console.log('Overlay alpha after tween:', damageOverlay.alpha); // Debug log
+      damageOverlay.alpha = 0; // Ensure it's completely invisible afterward
+      damageTween = null; // Reset the tween variable when done
+    },
   });
 }
