@@ -34,6 +34,7 @@ let damageOverlay;
 let damageTween;
 
 let ding;
+let damage;
 
 const game = new Phaser.Game(config);
 function preload() {
@@ -46,11 +47,13 @@ function preload() {
     frameHeight: 100,
   });
   this.load.audio('ding', 'assets/ding.wav');
+  this.load.audio('damage', 'assets/damage.wav');
 }
 
 function create() {
   // Add game objects here
   // this.add.image(400, 300, 'sky');
+
   player = this.physics.add.image(0, 500, 'player');
   bar = this.physics.add.image(400, 650, 'player');
   bar.setScale(8, 1);
@@ -117,6 +120,7 @@ function create() {
   damageOverlay.setDepth(10);
 
   ding = this.sound.add('ding');
+  damage = this.sound.add('damage');
 }
 function update() {
   const mouseX = this.input.x;
@@ -158,6 +162,7 @@ function loseLife(bar, fallingSprites) {
     heart.destroy();
   }
   pulseRed(this);
+  damage.play();
 }
 
 function startTimer() {
@@ -180,7 +185,7 @@ function tick() {
     `${Math.floor(time / 60)}:${Math.floor(time / 10) % 6}${time % 10}`
   );
   DELAY -= 7;
-  SPEED += 2;
+  SPEED += 7;
 }
 
 function pulseRed(scene) {
