@@ -33,6 +33,7 @@ let maxHearts = 5;
 let damageOverlay;
 let damageTween;
 
+let bg;
 let ding;
 let damage;
 
@@ -42,6 +43,7 @@ function preload() {
   // this.load.image('sky', 'assets/sky.png');
   this.load.image('player', 'assets/player.png');
   this.load.image('heart', 'assets/heart.png');
+  this.load.image('bg', 'assets/bg.jpg');
   this.load.spritesheet('rock', 'assets/rock.png', {
     frameWidth: 85,
     frameHeight: 100,
@@ -53,7 +55,7 @@ function preload() {
 function create() {
   // Add game objects here
   // this.add.image(400, 300, 'sky');
-
+  bg = this.add.image(0, 500, 'bg');
   player = this.physics.add.image(0, 500, 'player');
   bar = this.physics.add.image(400, 650, 'player');
   bar.setScale(8, 1);
@@ -149,6 +151,7 @@ function spawnRock() {
   startTimer.call(this);
 }
 function handleCollision(player, fallingSprites) {
+  
   fallingSprites.destroy(); // Remove the rock
   score++;
   scoreText.setText(`Score: ${score}`);
