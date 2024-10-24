@@ -50,6 +50,11 @@ function preload() {
   });
   this.load.audio('ding', 'assets/ding.wav');
   this.load.audio('damage', 'assets/damage.wav');
+
+  this.load.spritesheet('explosion', 'assets/explosion.png', {
+    frameWidth: 100,
+    frameHeight: 95,
+  });
 }
 
 function create() {
@@ -123,6 +128,13 @@ function create() {
 
   ding = this.sound.add('ding');
   damage = this.sound.add('damage');
+
+  this.anims.create({
+    key: 'explode',
+    frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 25 }), // Adjust frame numbers
+    frameRate: 60,
+    hideOnComplete: true, // Automatically hide when done
+  });
 }
 function update() {
   const mouseX = this.input.x;
@@ -151,7 +163,12 @@ function spawnRock() {
   startTimer.call(this);
 }
 function handleCollision(player, fallingSprites) {
-  
+  const explosion = this.physics.add
+    .sprite(fallingSprites.x, fallingSprites.y + 25, 'explosion')
+    .play('explode');
+  explosion.on('animationcomplete', () => {
+    explosion.destroy();
+  });
   fallingSprites.destroy(); // Remove the rock
   score++;
   scoreText.setText(`Score: ${score}`);
