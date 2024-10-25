@@ -23,7 +23,7 @@ let fallingSprites;
 let timerEvent;
 let clock;
 let SPEED = 300;
-let DELAY = 500;
+let DELAY = 10;
 let score = 0;
 let scoreText;
 let time = 0;
@@ -37,6 +37,7 @@ let bg;
 let ding;
 let damage;
 
+let loseText;
 const game = new Phaser.Game(config);
 function preload() {
   // Load assets here (e.g., images, sounds)
@@ -176,7 +177,7 @@ function handleCollision(player, fallingSprites) {
 }
 function loseLife(bar, fallingSprites) {
   fallingSprites.destroy(); // Remove the rock
-  if (hearts.length > 0) {
+  if (hearts.length > 1) {
     // Remove the last heart
     let heart = hearts.pop();
     heart.destroy();
@@ -229,4 +230,20 @@ function pulseRed(scene) {
       damageTween = null; // Reset the tween variable when done
     },
   });
+}
+function gameOver() {
+  alert('oo');
+  const overlay = scene.add
+    .rectangle(400, 300, 800, 600, 0x000000, 0.7)
+    .setOrigin(0.5);
+
+  // Add game over text
+  const gameOverText = scene.add
+    .text(400, 250, 'Game Over', {
+      fontSize: '64px',
+      fill: '#ffffff',
+    })
+    .setOrigin(0.5);
+
+  // Add a restart button
 }
