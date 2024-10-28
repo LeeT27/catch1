@@ -23,7 +23,7 @@ let fallingSprites;
 let timerEvent;
 let clock;
 let SPEED = 300;
-let DELAY = 10;
+let DELAY = 500;
 let score = 0;
 let scoreText;
 let time = 0;
@@ -37,7 +37,11 @@ let bg;
 let ding;
 let damage;
 
-let loseText;
+let gameOverText;
+let gameOverText2;
+let red;
+
+let gameBool = true;
 const game = new Phaser.Game(config);
 function preload() {
   // Load assets here (e.g., images, sounds)
@@ -136,6 +140,10 @@ function create() {
     frameRate: 60,
     hideOnComplete: true, // Automatically hide when done
   });
+
+  this.input.keyboard.on('keydown-R', function (event) {
+    restart();
+  });
 }
 function update() {
   const mouseX = this.input.x;
@@ -154,36 +162,45 @@ function update() {
   bar.setVelocityY(0);
 }
 function spawnRock() {
-  let rock = fallingSprites.create(
-    Phaser.Math.Between(32, config.width - 32),
-    0,
-    'rock'
-  );
-  rock.setScale(0.5, 0.5);
-  rock.anims.play('spin');
-  startTimer.call(this);
+  if (gameBool) {
+    let rock = fallingSprites.create(
+      Phaser.Math.Between(32, config.width - 32),
+      0,
+      'rock'
+    );
+    rock.setScale(0.5, 0.5);
+    rock.anims.play('spin');
+    startTimer.call(this);
+  }
 }
 function handleCollision(player, fallingSprites) {
-  const explosion = this.physics.add
-    .sprite(fallingSprites.x, fallingSprites.y + 25, 'explosion')
-    .play('explode');
-  explosion.on('animationcomplete', () => {
-    explosion.destroy();
-  });
-  fallingSprites.destroy(); // Remove the rock
-  score++;
-  scoreText.setText(`Score: ${score}`);
-  ding.play();
+  if (gameBool) {
+    const explosion = this.physics.add
+      .sprite(fallingSprites.x, fallingSprites.y + 25, 'explosion')
+      .play('explode');
+    explosion.on('animationcomplete', () => {
+      explosion.destroy();
+    });
+    fallingSprites.destroy(); // Remove the rock
+    score++;
+    scoreText.setText(`Score: ${score}`);
+    ding.play();
+  }
 }
 function loseLife(bar, fallingSprites) {
   fallingSprites.destroy(); // Remove the rock
-  if (hearts.length > 1) {
+  if (hearts.length > 0) {
     // Remove the last heart
     let heart = hearts.pop();
     heart.destroy();
   }
-  pulseRed(this);
-  damage.play();
+  if (hearts.length === 0) {
+    gameOver(this);
+  }
+  if (gameBool) {
+    pulseRed(this);
+    damage.play();
+  }
 }
 
 function startTimer() {
@@ -231,19 +248,27 @@ function pulseRed(scene) {
     },
   });
 }
-function gameOver() {
-  alert('oo');
-  const overlay = scene.add
-    .rectangle(400, 300, 800, 600, 0x000000, 0.7)
-    .setOrigin(0.5);
-
-  // Add game over text
-  const gameOverText = scene.add
-    .text(400, 250, 'Game Over', {
-      fontSize: '64px',
+function gameOver(scene) {
+  red = scene.add.graphics();
+  red.fillStyle(0x931a00, 1); // Red color
+  red.fillRect(0, 0, scene.scale.width, scene.scale.height);
+  gameOverText = scene.add
+    .text(400, 200, 'Game Over', {
+      font: '76px Comfortaa',
       fill: '#ffffff',
     })
     .setOrigin(0.5);
-
-  // Add a restart button
+  gameOverText2 = scene.add
+    .text(400, 300, 'Press R to restart', {
+      font: '40px Comfortaa',
+      fill: '#ffffff',
+    })
+    .setOrigin(0.5);
+  gameBool = false;
+}
+function restart() {
+  alert('restarted');
+  gameOverText.destroy();
+  gameOverText2.destroy();
+  red.destroy();
 }
