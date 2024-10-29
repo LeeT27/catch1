@@ -28,8 +28,7 @@ let score = 0;
 let scoreText;
 let time = 0;
 let timeText;
-let hearts = [];
-let maxHearts = 5;
+let lives = 5;
 let damageOverlay;
 let damageTween;
 
@@ -40,6 +39,12 @@ let damage;
 let gameOverText;
 let gameOverText2;
 let red;
+
+let heart1;
+let heart2;
+let heart3;
+let heart4;
+let heart5;
 
 let gameBool = true;
 const game = new Phaser.Game(config);
@@ -112,39 +117,42 @@ function create() {
     loop: true, // Loop the timer
   });
 
-  for (let i = 0; i < maxHearts; i++) {
-    let heart = this.add.image(50 + i * 50, 100, 'heart').setOrigin(0.5, 0.5);
-    heart.setScale(0.04);
-    hearts.push(heart);
-  }
-
-  damageOverlay = this.add.graphics();
-  damageOverlay.fillStyle(0xff0000, 0.5);
-  damageOverlay.fillRect(
-    0,
-    0,
-    this.cameras.main.width,
-    this.cameras.main.height
-  );
-
-  // Initially set the overlay to be invisible
-  damageOverlay.alpha = 0;
-  damageOverlay.setDepth(10);
-
-  ding = this.sound.add('ding');
-  damage = this.sound.add('damage');
-
-  this.anims.create({
-    key: 'explode',
-    frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 25 }), // Adjust frame numbers
-    frameRate: 60,
-    hideOnComplete: true, // Automatically hide when done
-  });
-
-  this.input.keyboard.on('keydown-R', function (event) {
-    restart();
-  });
+  heart1 = this.add.image(50, 100, 'heart').setOrigin(0.5, 0.5);
+  heart1.setScale(0.04);
+  heart2 = this.add.image(100, 100, 'heart').setOrigin(0.5, 0.5);
+  heart2.setScale(0.04);
+  heart3 = this.add.image(150, 100, 'heart').setOrigin(0.5, 0.5);
+  heart3.setScale(0.04);
+  heart4 = this.add.image(200, 100, 'heart').setOrigin(0.5, 0.5);
+  heart4.setScale(0.04);
+  heart5 = this.add.image(250, 100, 'heart').setOrigin(0.5, 0.5);
+  heart5.setScale(0.04);
 }
+
+damageOverlay = this.add.graphics();
+damageOverlay.fillStyle(0xff0000, 0.5);
+damageOverlay.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+
+// Initially set the overlay to be invisible
+damageOverlay.alpha = 0;
+damageOverlay.setDepth(10);
+
+ding = this.sound.add('ding');
+damage = this.sound.add('damage');
+
+this.anims.create({
+  key: 'explode',
+  frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 25 }), // Adjust frame numbers
+  frameRate: 60,
+  hideOnComplete: true, // Automatically hide when done
+});
+
+this.input.keyboard.on('keydown-R', function (event) {
+  if (gameBool === false) {
+    restart();
+  }
+});
+
 function update() {
   const mouseX = this.input.x;
   if (mouseX < player.width / 2) {
@@ -189,17 +197,16 @@ function handleCollision(player, fallingSprites) {
 }
 function loseLife(bar, fallingSprites) {
   fallingSprites.destroy(); // Remove the rock
-  if (hearts.length > 0) {
-    // Remove the last heart
-    let heart = hearts.pop();
-    heart.destroy();
-  }
-  if (hearts.length === 0) {
-    gameOver(this);
-  }
+  lives -= 1;
   if (gameBool) {
     pulseRed(this);
     damage.play();
+    if (lives === 4) {
+      heart5.setAlpha(0);
+    }
+    if (lives === 0) {
+      gameOver(this);
+    }
   }
 }
 
@@ -267,8 +274,15 @@ function gameOver(scene) {
   gameBool = false;
 }
 function restart() {
-  alert('restarted');
   gameOverText.destroy();
   gameOverText2.destroy();
   red.destroy();
+  gameBool = true;
+  DELAY = 500;
+  SPEED = 300;
+  time = 0;
+  timeText.setText(`0:00`);
+  score = 0;
+  scoreText.setText(`Score: 0`);
+  lives = 5;
 }
