@@ -28,7 +28,14 @@ let score = 0;
 let scoreText;
 let time = 0;
 let timeText;
+
 let lives = 5;
+let heart1;
+let heart2;
+let heart3;
+let heart4;
+let heart5;
+
 let damageOverlay;
 let damageTween;
 
@@ -38,13 +45,8 @@ let damage;
 
 let gameOverText;
 let gameOverText2;
+let gameOverText3;
 let red;
-
-let heart1;
-let heart2;
-let heart3;
-let heart4;
-let heart5;
 
 let gameBool = true;
 const game = new Phaser.Game(config);
@@ -127,32 +129,36 @@ function create() {
   heart4.setScale(0.04);
   heart5 = this.add.image(250, 100, 'heart').setOrigin(0.5, 0.5);
   heart5.setScale(0.04);
+
+  damageOverlay = this.add.graphics();
+  damageOverlay.fillStyle(0xff0000, 0.5);
+  damageOverlay.fillRect(
+    0,
+    0,
+    this.cameras.main.width,
+    this.cameras.main.height
+  );
+
+  // Initially set the overlay to be invisible
+  damageOverlay.alpha = 0;
+  damageOverlay.setDepth(10);
+
+  ding = this.sound.add('ding');
+  damage = this.sound.add('damage');
+
+  this.anims.create({
+    key: 'explode',
+    frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 25 }), // Adjust frame numbers
+    frameRate: 60,
+    hideOnComplete: true, // Automatically hide when done
+  });
+
+  this.input.keyboard.on('keydown-R', function (event) {
+    if (gameBool === false) {
+      restart();
+    }
+  });
 }
-
-damageOverlay = this.add.graphics();
-damageOverlay.fillStyle(0xff0000, 0.5);
-damageOverlay.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
-
-// Initially set the overlay to be invisible
-damageOverlay.alpha = 0;
-damageOverlay.setDepth(10);
-
-ding = this.sound.add('ding');
-damage = this.sound.add('damage');
-
-this.anims.create({
-  key: 'explode',
-  frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 25 }), // Adjust frame numbers
-  frameRate: 60,
-  hideOnComplete: true, // Automatically hide when done
-});
-
-this.input.keyboard.on('keydown-R', function (event) {
-  if (gameBool === false) {
-    restart();
-  }
-});
-
 function update() {
   const mouseX = this.input.x;
   if (mouseX < player.width / 2) {
@@ -204,7 +210,17 @@ function loseLife(bar, fallingSprites) {
     if (lives === 4) {
       heart5.setAlpha(0);
     }
+    if (lives === 3) {
+      heart4.setAlpha(0);
+    }
+    if (lives === 2) {
+      heart3.setAlpha(0);
+    }
+    if (lives === 1) {
+      heart2.setAlpha(0);
+    }
     if (lives === 0) {
+      heart1.setAlpha(0);
       gameOver(this);
     }
   }
@@ -271,6 +287,12 @@ function gameOver(scene) {
       fill: '#ffffff',
     })
     .setOrigin(0.5);
+  gameOverText2 = scene.add
+    .text(400, 400, `Score: ${score}`, {
+      font: '40px Comfortaa',
+      fill: '#ffffff',
+    })
+    .setOrigin(0.5);
   gameBool = false;
 }
 function restart() {
@@ -283,6 +305,10 @@ function restart() {
   time = 0;
   timeText.setText(`0:00`);
   score = 0;
-  scoreText.setText(`Score: 0`);
   lives = 5;
+  heart5.setAlpha(1);
+  heart4.setAlpha(1);
+  heart3.setAlpha(1);
+  heart2.setAlpha(1);
+  heart1.setAlpha(1);
 }
