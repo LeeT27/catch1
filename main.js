@@ -42,6 +42,8 @@ let damageTween;
 let bg;
 let ding;
 let damage;
+let lose;
+let again;
 
 let gameOverText;
 let gameOverText2;
@@ -62,6 +64,8 @@ function preload() {
   });
   this.load.audio('ding', 'assets/ding.wav');
   this.load.audio('damage', 'assets/damage.wav');
+  this.load.audio('lose', 'assets/lose.mp3');
+  this.load.audio('again', 'assets/restart.wav');
 
   this.load.spritesheet('explosion', 'assets/explosion.png', {
     frameWidth: 100,
@@ -145,6 +149,8 @@ function create() {
 
   ding = this.sound.add('ding');
   damage = this.sound.add('damage');
+  lose = this.sound.add('lose');
+  again = this.sound.add('again');
 
   this.anims.create({
     key: 'explode',
@@ -246,7 +252,7 @@ function tick() {
     `${Math.floor(time / 60)}:${Math.floor(time / 10) % 6}${time % 10}`
   );
   DELAY -= 7;
-  SPEED += 7;
+  SPEED += 9;
 }
 
 function pulseRed(scene) {
@@ -287,23 +293,27 @@ function gameOver(scene) {
       fill: '#ffffff',
     })
     .setOrigin(0.5);
-  gameOverText2 = scene.add
+  gameOverText3 = scene.add
     .text(400, 400, `Score: ${score}`, {
       font: '40px Comfortaa',
       fill: '#ffffff',
     })
     .setOrigin(0.5);
   gameBool = false;
+  lose.play();
 }
 function restart() {
+  again.play();
   gameOverText.destroy();
   gameOverText2.destroy();
+  gameOverText3.destroy();
   red.destroy();
   gameBool = true;
   DELAY = 500;
   SPEED = 300;
   time = 0;
   timeText.setText(`0:00`);
+  scoreText.setText(`Score: 0`);
   score = 0;
   lives = 5;
   heart5.setAlpha(1);
